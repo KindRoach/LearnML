@@ -6,9 +6,9 @@ from sklearn.linear_model import SGDClassifier
 from sklearn.metrics import classification_report
 from sklearn.model_selection import train_test_split
 
-from loghelper import get_logger
+from helper.loghelper import get_logger
 
-logger = get_logger("mnist.py")
+logger = get_logger(__name__)
 
 
 def get_data() -> (np.ndarray, np.ndarray):
