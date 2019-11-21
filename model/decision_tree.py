@@ -4,7 +4,7 @@ from sklearn.metrics import classification_report
 from sklearn.model_selection import train_test_split
 from sklearn.tree import DecisionTreeClassifier
 
-from helper.data_helper import get_mnist_data_int_binary_is5
+from helper.data_helper import *
 from helper.log_helper import get_logger
 
 logger = get_logger(__name__)
@@ -42,7 +42,7 @@ class DecisionTree(object):
         feature = self.__find_best_feature(samples, labels)
         children = dict()
         for samples_i, labels_i in self.__split_sets(samples, labels, feature):
-            children[labels_i[0]] = self.__fit_tree(samples_i, labels_i)
+            children[samples_i[0][feature]] = self.__fit_tree(samples_i, labels_i)
         return TreeNode(children=children, feature=feature)
 
     def __find_best_feature(self, samples: np.ndarray, labels: np.ndarray) -> int:
@@ -118,9 +118,9 @@ class DecisionTree(object):
 
 
 if __name__ == "__main__":
-    x, y = get_mnist_data_int_binary_is5()
+    x, y = get_mnist_data()
     sample_N = 1000
-    x = x[:sample_N]
+    x = x[:sample_N].astype(np.int)
     y = y[:sample_N]
     x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.3, random_state=42)
     my_tree = DecisionTree()
