@@ -1,11 +1,11 @@
 from collections import namedtuple
 
 import numpy as np
-from sklearn.metrics import classification_report
 from sklearn.model_selection import train_test_split
 from sklearn.neighbors import KNeighborsClassifier
 
-from helper.data_helper import *
+from helper.data_helper import get_mnist_data
+from helper.eval_helper import eval_classification
 from helper.log_helper import get_logger
 
 logger = get_logger(__name__)
@@ -37,15 +37,12 @@ def predict_many(x_test: np.ndarray, x_train: np.ndarray, y_train: np.ndarray) -
 
 
 if __name__ == "__main__":
-    x, y = get_mnist_data()
-    sample_N = 1000
-    x = x[:sample_N]
-    y = y[:sample_N]
+    x, y = get_mnist_data(n=1000)
     x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.3, random_state=42)
     y_pred = predict_many(x_test, x_train, y_train)
-    logger.info(f"my result:\n{classification_report(y_test, y_pred)}")
+    eval_classification("my", y_test, y_pred)
 
     neigh = KNeighborsClassifier(n_neighbors=KNN_N)
     neigh.fit(x_train, y_train)
     y_pred_sk = neigh.predict(x_test)
-    logger.info(f"sk result:\n{classification_report(y_test, y_pred_sk)}")
+    eval_classification("my", y_test, y_pred_sk)
