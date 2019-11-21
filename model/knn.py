@@ -1,14 +1,16 @@
 from collections import namedtuple
 
 import numpy as np
-from sklearn.linear_model import SGDClassifier
 from sklearn.metrics import classification_report
 from sklearn.model_selection import train_test_split
+from sklearn.neighbors import KNeighborsClassifier
 
 from helper.data_helper import get_mnist_data_binary_is5
 from helper.log_helper import get_logger
 
 logger = get_logger(__name__)
+
+KNN_N = 10
 
 
 def predict_one(digit: np.ndarray, x_train: np.ndarray, y_train: np.ndarray) -> bool:
@@ -18,7 +20,7 @@ def predict_one(digit: np.ndarray, x_train: np.ndarray, y_train: np.ndarray) -> 
         xi = x_train[i]
         yi = y_train[i]
         neighbors.append(Neighbor(xi, yi, np.linalg.norm(digit - xi)))
-    neighbors = sorted(neighbors, key=lambda neighbor: neighbor.dis)[:9]
+    neighbors = sorted(neighbors, key=lambda neighbor: neighbor.dis)[:KNN_N]
     neighbors = [neighbor.y for neighbor in neighbors]
     return max(neighbors, key=neighbors.count)
 
@@ -34,14 +36,15 @@ def predict_many(x_test: np.ndarray, x_train: np.ndarray, y_train: np.ndarray) -
     return np.array(y_pred)
 
 
-x, y = get_mnist_data_binary_is5()
-x = x[:5000]
-y = y[:5000]
-x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.3, random_state=42)
-y_pred_knn = predict_many(x_test, x_train, y_train)
-logger.info(f"knn result:\n{classification_report(y_test, y_pred_knn)}")
+if __name__ == "__main__":
+    x, y = get_mnist_data_binary_is5()
+    x = x[:5000]
+    y = y[:5000]
+    x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.3, random_state=42)
+    y_pred = predict_many(x_test, x_train, y_train)
+    logger.info(f"my result:\n{classification_report(y_test, y_pred)}")
 
-sgd_clf = SGDClassifier(random_state=42)
-sgd_clf.fit(x_train, y_train)
-y_pred_sgd = sgd_clf.predict(x_test)
-logger.info(f"sgd result:\n{classification_report(y_test, y_pred_sgd)}")
+    neigh = KNeighborsClassifier(n_neighbors=KNN_N)
+    neigh.fit(x_train, y_train)
+    y_pred_sk = neigh.predict(x_test)
+    logger.info(f"sk result:\n{classification_report(y_test, y_pred_sk)}")
